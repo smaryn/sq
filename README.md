@@ -1,2 +1,1 @@
-# sq
-SonqrQube docker container for Kubernetes
+### SonarQube docker container for Kubernetes

@@ -1,5 +1,5 @@
 FROM sonarqube:lts
-LABEL version="1.0"
+LABEL version="1.1"
 
 # ENV TERM=xterm JENHOME=/var/jenkins_home JENREF=/usr/share/jenkins/ref
 ENV TERM=xterm \
@@ -10,7 +10,7 @@ USER root
 
 RUN apt-get update && \
     apt-get -y upgrade && \
-    apt-get install -y htop mc net-tools sudo && \
+    apt-get install -y htop mc net-tools sudo wget curl unzip && \
     echo "sonar ALL=NOPASSWD: ALL" >> /etc/sudoers && \
     rm -rf /var/lib/apt/lists/*
 
@@ -29,8 +29,13 @@ RUN apt-get update
 # Install ''python-software-properties'', ''software-properties-common'' and PostgreSQL 9.4
 # There are some warnings (in red) that show up during the build. You can hide
 # them by prefixing each apt-get statement with DEBIAN_FRONTEND=noninteractive
-RUN DEBIAN_FRONTEND=noninteractive apt-get -y -q install python-software-properties software-properties-common wget curl unzip
-RUN DEBIAN_FRONTEND=noninteractive apt-get -y -q install postgresql-9.4 postgresql-client-9.4 postgresql-contrib-9.4
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y -q install \
+                              python-software-properties \
+                              software-properties-common \
+                                          postgresql-9.4 \
+                                   postgresql-client-9.4 \
+                                   postgresql-contrib-9.4
+# RUN DEBIAN_FRONTEND=noninteractive apt-get -y -q install postgresql-9.4 postgresql-client-9.4 postgresql-contrib-9.4
 
 # Install SonarQube
 # Note: Installs to /opt/sonar
