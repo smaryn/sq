@@ -1,4 +1,5 @@
 .vagrant
+kube/
 *.tmp
 *.old
 *.bak
