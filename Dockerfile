@@ -1,5 +1,5 @@
 FROM sonarqube:lts
-LABEL version="1.2"
+LABEL version="1.3"
 
 ENV TERM=xterm
 # ENV TERM=xterm \
@@ -43,7 +43,7 @@ RUN apt-get update && \
 
 # Run the rest of the commands as the ''postgres''
 # USER postgres
-USER sonar
+
 # Create a PostgreSQL role named ''docker'' with ''docker'' as the password and
 # then create a database `docker` owned by the ''docker'' role.
 # RUN /etc/init.d/postgresql start && \
