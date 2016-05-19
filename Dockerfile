@@ -1,6 +1,6 @@
 FROM java:openjdk-8u45-jdk
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="2.2"
+LABEL version="2.3.a"
 
 ENV TERM=xterm \
     SONAR_VERSION=4.5.7 \
@@ -63,4 +63,5 @@ RUN set -x \
 # VOLUME ["$SONARQUBE_HOME/data", "$SONARQUBE_HOME/extensions"]
 
 # WORKDIR $SONARQUBE_HOME
-ENTRYPOINT ["/etc/init.d/sonar start"]
+# ENTRYPOINT ["/etc/init.d/sonar start"]
+RUN /etc/init.d/sonar start
