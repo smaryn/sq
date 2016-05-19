@@ -1,6 +1,6 @@
 FROM java:openjdk-8u45-jdk
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="2.1.c"
+LABEL version="2.1.e"
 
 ENV TERM=xterm \
     SONAR_VERSION=4.5.7 \
@@ -28,15 +28,18 @@ EXPOSE 5432 9000
 # Allow remote connections to the database
 # RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/$PGVER/main/pg_hba.conf
 # RUN echo "listen_addresses='*'" >> /etc/postgresql/$PGVER/main/postgresql.conf
-
-# Create a PostgreSQL role named ''sonar'' with ''sonar'' as the password and
-# then create a database `sonar` owned by the ''sonar'' role.
 RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/$PGVER/main/pg_hba.conf \
     && echo "listen_addresses='*'" >> /etc/postgresql/$PGVER/main/postgresql.conf \
-    && /etc/init.d/postgresql restart
+    && /etc/init.d/postgresql restart \
+    && sleep 20 \
+    # Create a PostgreSQL role named ''sonar'' with ''sonar'' as the password and
+    # then create a database `sonar` owned by the ''sonar'' role.
+    && sudo -u postgres psql -c "CREATE USER sonar WITH REPLICATION PASSWORD 'sonar';" \
+    && sudo -u postgres createdb -O sonar -E UTF8 -T template0 sonar
 
 # Run the rest of the commands as the ''root''
 # USER root
+
 COPY sonar /etc/init.d/
 
 RUN set -x \
@@ -56,9 +59,7 @@ RUN set -x \
     # && sed -i '/jdbc:postgresql/s/^#//g' $SONARQUBE_HOME/conf/sonar.properties \
     && ln -s $SONAR_HOME/bin/linux-x86-64/sonar.sh /usr/bin/sonar \
     && chmod 755 /etc/init.d/sonar \
-    && update-rc.d sonar defaults \
-    && sudo -u postgres psql -c "CREATE USER sonar WITH REPLICATION PASSWORD 'sonar';" \
-    && sudo -u postgres createdb -O sonar -E UTF8 -T template0 sonar
+    && update-rc.d sonar defaults
 
 # VOLUME ["$SONARQUBE_HOME/data", "$SONARQUBE_HOME/extensions"]
 
