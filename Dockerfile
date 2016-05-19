@@ -1,6 +1,6 @@
 FROM java:openjdk-8u45-jdk
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="2.0"
+LABEL version="2.1.a"
 
 ENV TERM=xterm \
     SONAR_VERSION=4.5.7 \
@@ -31,7 +31,8 @@ EXPOSE 5432 9000
 
 # Create a PostgreSQL role named ''sonar'' with ''sonar'' as the password and
 # then create a database `sonar` owned by the ''sonar'' role.
-RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/9.3/main/pg_hba.conf \
+RUN /etc/init.d/postgresql restart \
+    && echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/9.3/main/pg_hba.conf \
     && echo "listen_addresses='*'" >> /etc/postgresql/9.3/main/postgresql.conf \
     && /etc/init.d/postgresql restart \
     && sudo -u postgres psql -c "CREATE USER sonar WITH REPLICATION PASSWORD 'sonar';" \
@@ -43,7 +44,6 @@ COPY sonar /etc/init.d/
 
 RUN set -x \
     && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys F1182E81C792928921DBCAB4CFCA4A29D26468DE \
-
     && cd /opt \
     && curl -o sonarqube.zip -fSL https://sonarsource.bintray.com/Distribution/sonarqube/sonarqube-$SONAR_VERSION.zip \
     && curl -o sonarqube.zip.asc -fSL https://sonarsource.bintray.com/Distribution/sonarqube/sonarqube-$SONAR_VERSION.zip.asc \
@@ -51,6 +51,12 @@ RUN set -x \
     && unzip sonarqube.zip \
     && mv sonarqube-$SONAR_VERSION sonarqube \
     && rm sonarqube.zip* \
+    && sed -i '/sonar.jdbc.username/s/^#//' $SONARQUBE_HOME/conf/sonar.properties \
+    # && sed -i '/sonar.jdbc.username/s/^#//g' $SONARQUBE_HOME/conf/sonar.properties \
+    && sed -i '/sonar.jdbc.password/s/^#//' $SONARQUBE_HOME/conf/sonar.properties \
+    # && sed -i '/sonar.jdbc.password/s/^#//g' $SONARQUBE_HOME/conf/sonar.properties \
+    && sed -i '/jdbc:postgresql/s/^#//' $SONARQUBE_HOME/conf/sonar.properties \
+    # && sed -i '/jdbc:postgresql/s/^#//g' $SONARQUBE_HOME/conf/sonar.properties \
     && ln -s $SONAR_HOME/bin/linux-x86-64/sonar.sh /usr/bin/sonar \
     && chmod 755 /etc/init.d/sonar \
     && update-rc.d sonar defaults
