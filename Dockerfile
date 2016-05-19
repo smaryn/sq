@@ -1,6 +1,6 @@
 FROM java:openjdk-8u45-jdk
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="2.1.e"
+LABEL version="2.2"
 
 ENV TERM=xterm \
     SONAR_VERSION=4.5.7 \
@@ -26,11 +26,10 @@ EXPOSE 5432 9000
 # Run commands as the ''postgres''
 # USER postgres
 # Allow remote connections to the database
-# RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/$PGVER/main/pg_hba.conf
-# RUN echo "listen_addresses='*'" >> /etc/postgresql/$PGVER/main/postgresql.conf
 RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/$PGVER/main/pg_hba.conf \
     && echo "listen_addresses='*'" >> /etc/postgresql/$PGVER/main/postgresql.conf \
     && /etc/init.d/postgresql restart \
+    # Sleep a little while postgresql is fully restarted
     && sleep 20 \
     # Create a PostgreSQL role named ''sonar'' with ''sonar'' as the password and
     # then create a database `sonar` owned by the ''sonar'' role.
