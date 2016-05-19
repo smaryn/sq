@@ -1,5 +1,6 @@
 .vagrant
 kube/
+tmp/
 *.tmp
 *.old
 *.bak

@@ -1,65 +1,61 @@
-FROM sonarqube:lts
-LABEL version="1.3"
+FROM java:openjdk-8u45-jdk
+MAINTAINER Sergii Marynenko <marynenko@gmail.com>
+LABEL version="2.0"
 
-ENV TERM=xterm
-# ENV TERM=xterm \
-#     SONAR_VERSION=4.5.7 \
-#     SONARQUBE_HOME=/opt/sonarqube
+ENV TERM=xterm \
+    SONAR_VERSION=4.5.7 \
+    SONARQUBE_HOME=/opt/sonarqube \
+    # Database configuration for Postgresql
+    SONARQUBE_JDBC_USERNAME=sonar \
+    SONARQUBE_JDBC_PASSWORD=sonar \
+    SONARQUBE_JDBC_URL=jdbc:postgresql://localhost/sonar
 
-USER root
 
-RUN apt-get update && \
-    apt-get -y upgrade && \
-    apt-get install -y htop mc net-tools sudo wget curl unzip && \
-    echo "sonar ALL=NOPASSWD: ALL" >> /etc/sudoers && \
-    rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+    && apt-get -y upgrade \
+    && apt-get install -y htop mc net-tools sudo wget curl unzip postgresql\
+    # && echo "sonar ALL=NOPASSWD: ALL" >> /etc/sudoers \
+    && rm -rf /var/lib/apt/lists/*
 
-# Add the PostgreSQL PGP key to verify their Debian packages.
-# It should be the same key as https://www.postgresql.org/media/keys/ACCC4CF8.asc
-# RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
+# Postgresql database and SonarQube http ports
+EXPOSE 5432 9000
 
-# Add PostgreSQL's repository. It contains the most recent stable release
-#     of PostgreSQL, ''9.4''.
-# RUN sh -c "echo deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main 9.4 > /etc/apt/sources.list.d/pgdg.list"
-# RUN sh -c "echo deb http://downloads.sourceforge.net/project/sonar-pkg/deb binary/ > /etc/apt/sources.list.d/sonar-pkg.list"
-
-# Update the Ubuntu and PostgreSQL repository indexes
-# RUN apt-get update
-
-# Install ''python-software-properties'', ''software-properties-common'' and PostgreSQL 9.4
-# There are some warnings (in red) that show up during the build. You can hide
-# them by prefixing each apt-get statement with DEBIAN_FRONTEND=noninteractive
-# RUN DEBIAN_FRONTEND=noninteractive apt-get -y -q install \
-#                               python-software-properties \
-#                               software-properties-common \
-#                                           postgresql-9.4 \
-#                                    postgresql-client-9.4 \
-#                                   postgresql-contrib-9.4
-# RUN DEBIAN_FRONTEND=noninteractive apt-get -y -q install postgresql-9.4 postgresql-client-9.4 postgresql-contrib-9.4
-
-# Install SonarQube
-# Note: Installs to /opt/sonar
-# RUN DEBIAN_FRONTEND=noninteractive apt-get -y -q --force-yes install sonar
-
-# Run the rest of the commands as the ''postgres''
-# USER postgres
-
-# Create a PostgreSQL role named ''docker'' with ''docker'' as the password and
-# then create a database `docker` owned by the ''docker'' role.
-# RUN /etc/init.d/postgresql start && \
-#     psql --command "CREATE USER docker WITH SUPERUSER PASSWORD 'docker';" && \
-#     createdb -O docker docker
-
-# Allow remote connections to the database
-# RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/9.4/main/pg_hba.conf
-
-# RUN echo "listen_addresses='*'" >> /etc/postgresql/9.4/main/postgresql.conf
-
-# Expose the PostgreSQL port
-# EXPOSE 5432
-
-# Expose the SonarQube port
+# Http port
 # EXPOSE 9000
 
-# Set the default command to run when starting the container
-# CMD ["/usr/lib/postgresql/9.4/bin/postgres", "-D", "/var/lib/postgresql/9.4/main", "-c", "config_file=/etc/postgresql/9.4/main/postgresql.conf"]
+# Run commands as the ''postgres''
+# USER postgres
+# Allow remote connections to the database
+# RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/9.3/main/pg_hba.conf
+# RUN echo "listen_addresses='*'" >> /etc/postgresql/9.3/main/postgresql.conf
+
+# Create a PostgreSQL role named ''sonar'' with ''sonar'' as the password and
+# then create a database `sonar` owned by the ''sonar'' role.
+RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/9.3/main/pg_hba.conf \
+    && echo "listen_addresses='*'" >> /etc/postgresql/9.3/main/postgresql.conf \
+    && /etc/init.d/postgresql restart \
+    && sudo -u postgres psql -c "CREATE USER sonar WITH REPLICATION PASSWORD 'sonar';" \
+    && sudo -u postgres createdb -O sonar -E UTF8 -T template0 sonar
+
+# Run the rest of the commands as the ''root''
+# USER root
+COPY sonar /etc/init.d/
+
+RUN set -x \
+    && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys F1182E81C792928921DBCAB4CFCA4A29D26468DE \
+
+    && cd /opt \
+    && curl -o sonarqube.zip -fSL https://sonarsource.bintray.com/Distribution/sonarqube/sonarqube-$SONAR_VERSION.zip \
+    && curl -o sonarqube.zip.asc -fSL https://sonarsource.bintray.com/Distribution/sonarqube/sonarqube-$SONAR_VERSION.zip.asc \
+    && gpg --batch --verify sonarqube.zip.asc sonarqube.zip \
+    && unzip sonarqube.zip \
+    && mv sonarqube-$SONAR_VERSION sonarqube \
+    && rm sonarqube.zip* \
+    && ln -s $SONAR_HOME/bin/linux-x86-64/sonar.sh /usr/bin/sonar \
+    && chmod 755 /etc/init.d/sonar \
+    && update-rc.d sonar defaults
+
+# VOLUME ["$SONARQUBE_HOME/data", "$SONARQUBE_HOME/extensions"]
+
+# WORKDIR $SONARQUBE_HOME
+ENTRYPOINT ["/etc/init.d/sonar start"]
