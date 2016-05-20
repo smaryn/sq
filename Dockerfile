@@ -13,7 +13,7 @@ ENV TERM=xterm \
     SQ_PW=sonar \
     # SONARQUBE_JDBC_PASSWORD=sonar \
     SQ_DB=sonar \
-    SQ_URL=https://sonarsource.bintray.com/Distribution/sonarqube
+    SQ_URL=https://sonarsource.bintray.com/Distribution/sonarqube \
     SONARQUBE_JDBC_URL=jdbc:postgresql://localhost/sonar
 
 RUN apt-get update \
