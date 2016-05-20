@@ -1,6 +1,6 @@
 FROM java:openjdk-8u45-jdk
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="2.4.c"
+LABEL version="2.4"
 
 ENV TERM=xterm \
     SONARQUBE_VERSION=4.5.7 \
@@ -16,34 +16,14 @@ ENV TERM=xterm \
     SQ_URL=https://sonarsource.bintray.com/Distribution/sonarqube \
     SONARQUBE_JDBC_URL=jdbc:postgresql://localhost/sonar
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get -q -y update \
+RUN apt-get -q -y update \
     && apt-get -q -y upgrade \
-    && apt-get install -q -y htop mc net-tools sudo wget curl unzip postgresql \
-    && unset DEBIAN_FRONTEND \
+    && apt-get -q -y install htop mc net-tools sudo wget curl unzip postgresql \
     # && echo "$SQ_USER ALL=NOPASSWD: ALL" >> /etc/sudoers \
     && rm -rf /var/lib/apt/lists/*
 
 # Postgresql database and SonarQube http ports
 EXPOSE 5432 9000
-
-# Http port
-# EXPOSE 9000
-
-# Run commands as the ''postgres''
-# USER postgres
-# Allow remote connections to the database
-# RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/$PG_VERSION/main/pg_hba.conf \
-#     && echo "listen_addresses='*'" >> /etc/postgresql/$PG_VERSION/main/postgresql.conf \
-#     && /etc/init.d/postgresql restart \
-#     # Sleep a little while postgresql is fully restarted
-#     && sleep 20 \
-#     # Create a PostgreSQL role named ''sonar'' with ''sonar'' as the password and
-#     # then create a database `sonar` owned by the ''sonar'' role.
-#     && sudo -u postgres psql -c "CREATE USER $SQ_USER WITH REPLICATION PASSWORD '$SQ_PW';" \
-#     && sudo -u postgres createdb -O $SQ_USER -E UTF8 -T template0 $SQ_DB
-
-# Run the rest of the commands as the ''root''
-# USER root
 
 COPY sonar /etc/init.d/
 
@@ -79,8 +59,6 @@ RUN set -x \
 
 # VOLUME ["$SONARQUBE_HOME/data", "$SONARQUBE_HOME/extensions"]
 
-# WORKDIR $SONARQUBE_HOME
-# RUN /etc/init.d/sonar start
 # ENTRYPOINT ["/bin/bash"]
 CMD service postgresql start && service sonar start \
     && tail -F /var/log/postgresql/postgresql-$PG_VERSION-main.log $SONARQUBE_HOME/logs/sonar.log
