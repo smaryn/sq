@@ -1,6 +1,6 @@
 FROM java:openjdk-8u45-jdk
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="2.4.b"
+LABEL version="2.4.c"
 
 ENV TERM=xterm \
     SONARQUBE_VERSION=4.5.7 \
@@ -16,9 +16,10 @@ ENV TERM=xterm \
     SQ_URL=https://sonarsource.bintray.com/Distribution/sonarqube \
     SONARQUBE_JDBC_URL=jdbc:postgresql://localhost/sonar
 
-RUN apt-get update \
-    && apt-get -y upgrade \
-    && apt-get install -y htop mc net-tools sudo wget curl unzip postgresql \
+RUN DEBIAN_FRONTEND=noninteractive apt-get -q -y update \
+    && apt-get -q -y upgrade \
+    && apt-get install -q -y htop mc net-tools sudo wget curl unzip postgresql \
+    && unset DEBIAN_FRONTEND \
     # && echo "$SQ_USER ALL=NOPASSWD: ALL" >> /etc/sudoers \
     && rm -rf /var/lib/apt/lists/*
 
@@ -47,7 +48,7 @@ EXPOSE 5432 9000
 COPY sonar /etc/init.d/
 
 RUN set -x \
-    echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/$PG_VERSION/main/pg_hba.conf \
+    && echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/$PG_VERSION/main/pg_hba.conf \
     && echo "listen_addresses='*'" >> /etc/postgresql/$PG_VERSION/main/postgresql.conf \
     && /etc/init.d/postgresql restart \
     # Sleep a little while postgresql is fully restarted
