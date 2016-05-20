@@ -1,6 +1,6 @@
 FROM java:openjdk-8u45-jdk
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="2.3.d"
+LABEL version="2.4.a"
 
 ENV TERM=xterm \
     SONARQUBE_VERSION=4.5.7 \
@@ -61,7 +61,8 @@ RUN set -x \
     && curl -k -o sonarqube.zip -fSL $SQ_URL/sonarqube-$SONARQUBE_VERSION.zip \
     && curl -k -o sonarqube.zip.asc -fSL $SQ_URL/sonarqube-$SONARQUBE_VERSION.zip.asc \
     && gpg --batch --verify sonarqube.zip.asc sonarqube.zip \
-    && unzip sonarqube.zip \
+    # Run unzip quietly to avoid log flooding
+    && unzip -q sonarqube.zip \
     && mv sonarqube-$SONARQUBE_VERSION sonarqube \
     && rm sonarqube.zip* \
     && sed -i '/sonar.jdbc.username/s/^#//' $SONARQUBE_HOME/conf/sonar.properties \
@@ -72,13 +73,12 @@ RUN set -x \
     # && sed -i '/jdbc:postgresql/s/^#//g' $SONARQUBE_HOME/conf/sonar.properties \
     && ln -s $SONARQUBE_HOME/bin/linux-x86-64/sonar.sh /usr/bin/sonar \
     && chmod 755 /etc/init.d/sonar \
-    && update-rc.d sonar defaults \
-    && sleep 5 \
-    && /etc/init.d/sonar start
+    && update-rc.d sonar defaults
 
 # VOLUME ["$SONARQUBE_HOME/data", "$SONARQUBE_HOME/extensions"]
 
 # WORKDIR $SONARQUBE_HOME
 # RUN /etc/init.d/sonar start
 # ENTRYPOINT ["/bin/bash"]
-# ENTRYPOINT ["/etc/init.d/sonar start"]
+CMD service postgresql start && service sonar start \
+    && tail -F /var/log/postgresql/postgresql-$PG_VERSION-main.log $SONARQUBE_HOME/logs/sonar.log
