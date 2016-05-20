@@ -1,6 +1,6 @@
 FROM java:openjdk-8u45-jdk
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="2.3.c"
+LABEL version="2.3.d"
 
 ENV TERM=xterm \
     SONARQUBE_VERSION=4.5.7 \
@@ -57,13 +57,13 @@ RUN set -x \
     && sudo -u postgres psql -c "CREATE USER $SQ_USER WITH REPLICATION PASSWORD '$SQ_PW';" \
     && sudo -u postgres createdb -O $SQ_USER -E UTF8 -T template0 $SQ_DB \
     && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys F1182E81C792928921DBCAB4CFCA4A29D26468DE \
-    # && cd /opt \
-    && curl -k -o $SONARQUBE_HOME/sonarqube.zip -fSL $SQ_URL/sonarqube-$SONARQUBE_VERSION.zip \
-    && curl -k -o $SONARQUBE_HOME/sonarqube.zip.asc -fSL $SQ_URL/sonarqube-$SONARQUBE_VERSION.zip.asc \
-    && gpg --batch --verify $SONARQUBE_HOME/sonarqube.zip.asc $SONARQUBE_HOME/sonarqube.zip \
-    && unzip $SONARQUBE_HOME/sonarqube.zip \
-    && mv $SONARQUBE_HOME/sonarqube-$SONARQUBE_VERSION $SONARQUBE_HOME/sonarqube \
-    && rm $SONARQUBE_HOME/sonarqube.zip* \
+    && cd /opt \
+    && curl -k -o sonarqube.zip -fSL $SQ_URL/sonarqube-$SONARQUBE_VERSION.zip \
+    && curl -k -o sonarqube.zip.asc -fSL $SQ_URL/sonarqube-$SONARQUBE_VERSION.zip.asc \
+    && gpg --batch --verify sonarqube.zip.asc sonarqube.zip \
+    && unzip sonarqube.zip \
+    && mv sonarqube-$SONARQUBE_VERSION sonarqube \
+    && rm sonarqube.zip* \
     && sed -i '/sonar.jdbc.username/s/^#//' $SONARQUBE_HOME/conf/sonar.properties \
     # && sed -i '/sonar.jdbc.username/s/^#//g' $SONARQUBE_HOME/conf/sonar.properties \
     && sed -i '/sonar.jdbc.password/s/^#//' $SONARQUBE_HOME/conf/sonar.properties \
