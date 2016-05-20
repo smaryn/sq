@@ -1,6 +1,6 @@
 FROM java:openjdk-8u45-jdk
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="2.4.a"
+LABEL version="2.4.b"
 
 ENV TERM=xterm \
     SONARQUBE_VERSION=4.5.7 \
@@ -56,6 +56,7 @@ RUN set -x \
     # then create a database `sonar` owned by the ''sonar'' role.
     && sudo -u postgres psql -c "CREATE USER $SQ_USER WITH REPLICATION PASSWORD '$SQ_PW';" \
     && sudo -u postgres createdb -O $SQ_USER -E UTF8 -T template0 $SQ_DB \
+    && /etc/init.d/postgresql stop \
     && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys F1182E81C792928921DBCAB4CFCA4A29D26468DE \
     && cd /opt \
     && curl -k -o sonarqube.zip -fSL $SQ_URL/sonarqube-$SONARQUBE_VERSION.zip \
