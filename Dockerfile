@@ -17,7 +17,7 @@ ENV TERM=xterm \
 
 RUN apt-get update \
     && apt-get -y upgrade \
-    && apt-get install -y htop mc net-tools sudo wget curl unzip postgresql\
+    && apt-get install -y htop mc net-tools sudo wget curl unzip postgresql \
     # && echo "$SQ_USER ALL=NOPASSWD: ALL" >> /etc/sudoers \
     && rm -rf /var/lib/apt/lists/*
 
@@ -62,10 +62,12 @@ RUN set -x \
     # && sed -i '/jdbc:postgresql/s/^#//g' $SONARQUBE_HOME/conf/sonar.properties \
     && ln -s $SONARQUBE_HOME/bin/linux-x86-64/sonar.sh /usr/bin/sonar \
     && chmod 755 /etc/init.d/sonar \
-    && update-rc.d sonar defaults
+    && update-rc.d sonar defaults \
+    && /etc/init.d/sonar start
 
 # VOLUME ["$SONARQUBE_HOME/data", "$SONARQUBE_HOME/extensions"]
 
 # WORKDIR $SONARQUBE_HOME
 # RUN /etc/init.d/sonar start
-ENTRYPOINT ["/etc/init.d/sonar start"]
+ENTRYPOINT ["/bin/bash"]
+# ENTRYPOINT ["/etc/init.d/sonar start"]
