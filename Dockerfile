@@ -81,7 +81,7 @@ RUN set -x \
     # LDAP settings should be applied after ldap plugin installation
     # wget --tries=2 -q -c -P $SONARQUBE_HOME/extensions/plugins/ \
     && wget --tries=2 -c -P $SONARQUBE_HOME/extensions/plugins/ \
-    http://sonarsource.bintray.com/Distribution/sonar-ldap-plugin/sonar-ldap-plugin-2.0.jar
+    http://sonarsource.bintray.com/Distribution/sonar-ldap-plugin/sonar-ldap-plugin-2.0.jar \
     && cat /tmp/sonar.ldap >> $SONARQUBE_HOME/conf/sonar.properties \
     && ln -s $SONARQUBE_HOME/bin/linux-x86-64/sonar.sh /usr/bin/sonar \
     && mv /tmp/sonar /etc/init.d/sonar \
