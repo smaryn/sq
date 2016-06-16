@@ -1,7 +1,7 @@
 # FROM java:openjdk-8u45-jdk
 FROM java:8
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="3.4"
+LABEL version="3.5.a"
 
 ENV TERM=xterm \
     SONARQUBE_VERSION=5.6 \
@@ -19,7 +19,7 @@ ENV TERM=xterm \
 
 RUN apt-get -q -y update \
     && apt-get -q -y upgrade \
-    && apt-get -q -y install apt-utils htop mc net-tools sudo wget curl unzip vim postgresql \
+    && apt-get -q -y install mc net-tools sudo wget curl unzip vim postgresql \
     # && echo "$SQ_USER ALL=NOPASSWD: ALL" >> /etc/sudoers \
     && rm -rf /var/lib/apt/lists/*
 
@@ -75,7 +75,7 @@ RUN set -x \
     && sed -i 's/sonar.jdbc.password=.*/sonar.jdbc.password='$SQ_PW'/g' $SONARQUBE_HOME/conf/sonar.properties \
     && sed -i '/jdbc:postgresql/s/^#//' $SONARQUBE_HOME/conf/sonar.properties \
     # && sed -i '/jdbc:postgresql/s/^#//g' $SONARQUBE_HOME/conf/sonar.properties \
-    && cat /tmp/sonar.ldap >> $SONARQUBE_HOME/conf/sonar.properties \
+    # && cat /tmp/sonar.ldap >> $SONARQUBE_HOME/conf/sonar.properties \
     && ln -s $SONARQUBE_HOME/bin/linux-x86-64/sonar.sh /usr/bin/sonar \
     && mv /tmp/sonar /etc/init.d/sonar \
     && chmod 755 /etc/init.d/sonar \
@@ -84,5 +84,6 @@ RUN set -x \
 # VOLUME ["$SONARQUBE_HOME/data", "$SONARQUBE_HOME/extensions"]
 
 # ENTRYPOINT ["/bin/bash"]
-CMD service postgresql start && service sonar start \
-    && tail -F /var/log/postgresql/postgresql-$PG_VERSION-main.log $SONARQUBE_HOME/logs/sonar.log
+# CMD service postgresql start && service sonar start \
+    # && tail -F /var/log/postgresql/postgresql-$PG_VERSION-main.log $SONARQUBE_HOME/logs/sonar.log
+CMD service postgresql start && tail -F /var/log/postgresql/postgresql-$PG_VERSION-main.log
