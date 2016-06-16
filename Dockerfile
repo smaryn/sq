@@ -1,7 +1,7 @@
 # FROM java:openjdk-8u45-jdk
 FROM java:8
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="3.3.e"
+LABEL version="3.3.f"
 
 ENV TERM=xterm \
     SONARQUBE_VERSION=5.6 \
@@ -19,7 +19,7 @@ ENV TERM=xterm \
 
 RUN apt-get -q -y update \
     && apt-get -q -y upgrade \
-    && apt-get -q -y install htop mc net-tools sudo wget curl unzip vim postgresql \
+    && apt-get -q -y install apt-utils htop mc net-tools sudo wget curl unzip vim postgresql \
     # && echo "$SQ_USER ALL=NOPASSWD: ALL" >> /etc/sudoers \
     && rm -rf /var/lib/apt/lists/*
 
@@ -27,7 +27,7 @@ RUN apt-get -q -y update \
 EXPOSE 5432 9000
 
 COPY sonar /etc/init.d/
-COPY sonar.ldap $SONARQUBE_HOME/
+COPY sonar.ldap /tmp/
 
 RUN set -x \
     && echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/$PG_VERSION/main/pg_hba.conf \
@@ -65,6 +65,7 @@ RUN set -x \
     # && rm -rf sonarqube \
     && mv sonarqube-$SONARQUBE_VERSION sonarqube \
     && rm sonarqube.zip* \
+    && ls -al && pwd \
     # && sed -i '/sonar.jdbc.username/s/^#//' $SONARQUBE_HOME/conf/sonar.properties \
     && sed -i '/sonar.jdbc.username=/s/^#//' conf/sonar.properties \
     # && sed -i '/sonar.jdbc.username=/s/^#//g' $SONARQUBE_HOME/conf/sonar.properties \
@@ -74,7 +75,7 @@ RUN set -x \
     && sed -i 's/sonar.jdbc.password=.*/sonar.jdbc.password='$SQ_PW'/g' $SONARQUBE_HOME/conf/sonar.properties \
     && sed -i '/jdbc:postgresql/s/^#//' $SONARQUBE_HOME/conf/sonar.properties \
     # && sed -i '/jdbc:postgresql/s/^#//g' $SONARQUBE_HOME/conf/sonar.properties \
-    && cat $SONARQUBE_HOME/sonar.ldap >> $SONARQUBE_HOME/conf/sonar.properties \
+    && cat /tmp/sonar.ldap >> $SONARQUBE_HOME/conf/sonar.properties \
     && ln -s $SONARQUBE_HOME/bin/linux-x86-64/sonar.sh /usr/bin/sonar \
     && chmod 755 /etc/init.d/sonar \
     && update-rc.d sonar defaults
