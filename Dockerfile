@@ -1,7 +1,7 @@
 # FROM java:openjdk-8u45-jdk
 FROM java:8
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="3.1"
+LABEL version="3.2"
 
 ENV TERM=xterm \
     SONARQUBE_VERSION=5.6 \
@@ -66,10 +66,10 @@ RUN set -x \
     && rm sonarqube.zip* \
     && sed -i '/sonar.jdbc.username=/s/^#//' $SONARQUBE_HOME/conf/sonar.properties \
     # && sed -i '/sonar.jdbc.username=/s/^#//g' $SONARQUBE_HOME/conf/sonar.properties \
-    $$ sed -i 's/sonar.jdbc.username=.*/sonar.jdbc.username='$SQ_USER'/g' $SONARQUBE_HOME/conf/sonar.properties \
+    && sed -i 's/sonar.jdbc.username=.*/sonar.jdbc.username='$SQ_USER'/g' $SONARQUBE_HOME/conf/sonar.properties \
     && sed -i '/sonar.jdbc.password=/s/^#//' $SONARQUBE_HOME/conf/sonar.properties \
     # && sed -i '/sonar.jdbc.password=/s/^#//g' $SONARQUBE_HOME/conf/sonar.properties \
-    $$ sed -i 's/sonar.jdbc.password=.*/sonar.jdbc.password='$SQ_PW'/g' $SONARQUBE_HOME/conf/sonar.properties \
+    && sed -i 's/sonar.jdbc.password=.*/sonar.jdbc.password='$SQ_PW'/g' $SONARQUBE_HOME/conf/sonar.properties \
     && sed -i '/jdbc:postgresql/s/^#//' $SONARQUBE_HOME/conf/sonar.properties \
     # && sed -i '/jdbc:postgresql/s/^#//g' $SONARQUBE_HOME/conf/sonar.properties \
     && cat $SONARQUBE_HOME/sonar.ldap >> $SONARQUBE_HOME/conf/sonar.properties \
