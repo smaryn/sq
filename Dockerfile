@@ -1,7 +1,7 @@
 # FROM java:openjdk-8u45-jdk
 FROM java:8
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="3.5.b"
+LABEL version="3.5.c"
 
 ENV TERM=xterm \
     SONARQUBE_VERSION=5.6 \
@@ -40,7 +40,6 @@ RUN set -x \
     # then create a database `sonar` owned by the ''sonar'' role.
     && sudo -u postgres psql -c "CREATE USER $SQ_USER WITH REPLICATION PASSWORD '$SQ_PW';" \
     && sudo -u postgres createdb -O $SQ_USER -E UTF8 -T template0 $SQ_DB \
-    && /etc/init.d/postgresql stop \
 
     # see https://bugs.debian.org/812708
     # and https://github.com/SonarSource/docker-sonarqube/pull/18#issuecomment-194045499
@@ -86,11 +85,14 @@ RUN set -x \
     && ln -s $SONARQUBE_HOME/bin/linux-x86-64/sonar.sh /usr/bin/sonar \
     && mv /tmp/sonar /etc/init.d/sonar \
     && chmod 755 /etc/init.d/sonar \
-    && update-rc.d sonar defaults
+    && update-rc.d sonar defaults \
+    # Stop Postgresql to awoid unexpected exit
+    # && /etc/init.d/postgresql stop
+    && service postgresql stop
 
 # VOLUME ["$SONARQUBE_HOME/data", "$SONARQUBE_HOME/extensions"]
 
 # ENTRYPOINT ["/bin/bash"]
-CMD service postgresql start && service sonar start \
+CMD service postgresql start && sleep 10 && service sonar start \
     && tail -F /var/log/postgresql/postgresql-$PG_VERSION-main.log $SONARQUBE_HOME/logs/sonar.log
 # CMD service postgresql start && tail -F /var/log/postgresql/postgresql-$PG_VERSION-main.log
