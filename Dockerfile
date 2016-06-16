@@ -1,7 +1,7 @@
 # FROM java:openjdk-8u45-jdk
 FROM java:8
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="3.3"
+LABEL version="3.4"
 
 ENV TERM=xterm \
     SONARQUBE_VERSION=5.6 \
@@ -24,10 +24,11 @@ RUN apt-get -q -y update \
     && rm -rf /var/lib/apt/lists/*
 
 # Postgresql database and SonarQube http ports
-EXPOSE 5432 9000 9092
+EXPOSE 5432 9000
 
-COPY sonar /etc/init.d/
-COPY sonar.ldap /tmp/
+# COPY sonar /etc/init.d/
+# COPY sonar.ldap /tmp/
+COPY sonar* /tmp/
 
 RUN set -x \
     && echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/$PG_VERSION/main/pg_hba.conf \
@@ -76,6 +77,7 @@ RUN set -x \
     # && sed -i '/jdbc:postgresql/s/^#//g' $SONARQUBE_HOME/conf/sonar.properties \
     && cat /tmp/sonar.ldap >> $SONARQUBE_HOME/conf/sonar.properties \
     && ln -s $SONARQUBE_HOME/bin/linux-x86-64/sonar.sh /usr/bin/sonar \
+    && mv /tmp/sonar /etc/init.d/sonar \
     && chmod 755 /etc/init.d/sonar \
     && update-rc.d sonar defaults
 
