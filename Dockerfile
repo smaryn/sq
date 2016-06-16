@@ -1,7 +1,7 @@
 # FROM java:openjdk-8u45-jdk
 FROM java:8
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="3.3.a"
+LABEL version="3.3.b"
 
 ENV TERM=xterm \
     SONARQUBE_VERSION=5.6 \
@@ -72,7 +72,7 @@ RUN set -x \
     # && sed -i 's/sonar.jdbc.password=.*/sonar.jdbc.password='$SQ_PW'/g' $SONARQUBE_HOME/conf/sonar.properties \
     && sed -i '/jdbc:postgresql/s/^#//' $SONARQUBE_HOME/conf/sonar.properties \
     # && sed -i '/jdbc:postgresql/s/^#//g' $SONARQUBE_HOME/conf/sonar.properties \
-    && cat $SONARQUBE_HOME/sonar.ldap >> $SONARQUBE_HOME/conf/sonar.properties \
+    # && cat $SONARQUBE_HOME/sonar.ldap >> $SONARQUBE_HOME/conf/sonar.properties \
     && ln -s $SONARQUBE_HOME/bin/linux-x86-64/sonar.sh /usr/bin/sonar \
     && chmod 755 /etc/init.d/sonar \
     && update-rc.d sonar defaults
