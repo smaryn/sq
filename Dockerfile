@@ -1,7 +1,7 @@
 # FROM java:openjdk-8u45-jdk
 FROM java:8
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="3.3.g"
+LABEL version="3.3"
 
 ENV TERM=xterm \
     SONARQUBE_VERSION=5.6 \
@@ -24,7 +24,7 @@ RUN apt-get -q -y update \
     && rm -rf /var/lib/apt/lists/*
 
 # Postgresql database and SonarQube http ports
-EXPOSE 5432 9000
+EXPOSE 5432 9000 9092
 
 COPY sonar /etc/init.d/
 COPY sonar.ldap /tmp/
@@ -65,7 +65,6 @@ RUN set -x \
     # && rm -rf sonarqube \
     && mv sonarqube-$SONARQUBE_VERSION sonarqube \
     && rm sonarqube.zip* \
-    && ls -al && pwd \
     # && sed -i '/sonar.jdbc.username/s/^#//' $SONARQUBE_HOME/conf/sonar.properties \
     && sed -i '/sonar.jdbc.username=/s/^#//' $SONARQUBE_HOME/conf/sonar.properties \
     # && sed -i '/sonar.jdbc.username=/s/^#//g' $SONARQUBE_HOME/conf/sonar.properties \
