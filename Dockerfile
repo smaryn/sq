@@ -1,7 +1,7 @@
 # FROM java:openjdk-8u45-jdk
 FROM java:8
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="3.3.c"
+LABEL version="3.3.d"
 
 ENV TERM=xterm \
     SONARQUBE_VERSION=5.6 \
@@ -27,7 +27,7 @@ RUN apt-get -q -y update \
 EXPOSE 5432 9000
 
 COPY sonar /etc/init.d/
-COPY sonar.ldap $SONARQUBE_HOME
+COPY sonar.ldap $SONARQUBE_HOME/
 
 RUN set -x \
     && echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/$PG_VERSION/main/pg_hba.conf \
@@ -62,7 +62,7 @@ RUN set -x \
     && gpg --batch --verify sonarqube.zip.asc sonarqube.zip \
     # Run unzip quietly to avoid log flooding
     && unzip -q sonarqube.zip \
-    && rm -rf sonarqube \
+    # && rm -rf sonarqube \
     && mv sonarqube-$SONARQUBE_VERSION sonarqube \
     && rm sonarqube.zip* \
     && sed -i '/sonar.jdbc.username=/s/^#//' $SONARQUBE_HOME/conf/sonar.properties \
