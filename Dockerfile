@@ -1,7 +1,7 @@
 # FROM java:openjdk-8u45-jdk
 FROM java:8
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="3.5.a"
+LABEL version="3.5.b"
 
 ENV TERM=xterm \
     SONARQUBE_VERSION=5.6 \
@@ -66,6 +66,8 @@ RUN set -x \
     # && rm -rf sonarqube \
     && mv sonarqube-$SONARQUBE_VERSION sonarqube \
     && rm sonarqube.zip* \
+
+    # Database settings
     # && sed -i '/sonar.jdbc.username/s/^#//' $SONARQUBE_HOME/conf/sonar.properties \
     && sed -i '/sonar.jdbc.username=/s/^#//' $SONARQUBE_HOME/conf/sonar.properties \
     # && sed -i '/sonar.jdbc.username=/s/^#//g' $SONARQUBE_HOME/conf/sonar.properties \
@@ -75,7 +77,12 @@ RUN set -x \
     && sed -i 's/sonar.jdbc.password=.*/sonar.jdbc.password='$SQ_PW'/g' $SONARQUBE_HOME/conf/sonar.properties \
     && sed -i '/jdbc:postgresql/s/^#//' $SONARQUBE_HOME/conf/sonar.properties \
     # && sed -i '/jdbc:postgresql/s/^#//g' $SONARQUBE_HOME/conf/sonar.properties \
-    # && cat /tmp/sonar.ldap >> $SONARQUBE_HOME/conf/sonar.properties \
+
+    # LDAP settings should be applied after ldap plugin installation
+    # wget --tries=2 -q -c -P $SONARQUBE_HOME/extensions/plugins/ \
+    && wget --tries=2 -c -P $SONARQUBE_HOME/extensions/plugins/ \
+    http://sonarsource.bintray.com/Distribution/sonar-ldap-plugin/sonar-ldap-plugin-2.0.jar
+    && cat /tmp/sonar.ldap >> $SONARQUBE_HOME/conf/sonar.properties \
     && ln -s $SONARQUBE_HOME/bin/linux-x86-64/sonar.sh /usr/bin/sonar \
     && mv /tmp/sonar /etc/init.d/sonar \
     && chmod 755 /etc/init.d/sonar \
@@ -84,6 +91,6 @@ RUN set -x \
 # VOLUME ["$SONARQUBE_HOME/data", "$SONARQUBE_HOME/extensions"]
 
 # ENTRYPOINT ["/bin/bash"]
-# CMD service postgresql start && service sonar start \
-    # && tail -F /var/log/postgresql/postgresql-$PG_VERSION-main.log $SONARQUBE_HOME/logs/sonar.log
-CMD service postgresql start && tail -F /var/log/postgresql/postgresql-$PG_VERSION-main.log
+CMD service postgresql start && service sonar start \
+    && tail -F /var/log/postgresql/postgresql-$PG_VERSION-main.log $SONARQUBE_HOME/logs/sonar.log
+# CMD service postgresql start && tail -F /var/log/postgresql/postgresql-$PG_VERSION-main.log
