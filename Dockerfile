@@ -1,11 +1,13 @@
 FROM java:8
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="3.5"
+LABEL version="3.5.1"
 
 ENV TERM=xterm \
     SONARQUBE_VERSION=5.6 \
     # Postgresql version
     PG_VERSION=9.4 \
+    # Do not use SONARQUBE_HOME until it is created with
+    # "&& mv sonarqube-$SONARQUBE_VERSION sonarqube \" line in RUN instruction
     SONARQUBE_HOME=/opt/sonarqube \
     # Database configuration for Postgresql
     SQ_USER=sonar \
