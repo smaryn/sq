@@ -18,11 +18,10 @@ ENV TERM=xterm \
     SQ_URL=https://sonarsource.bintray.com/Distribution/sonarqube \
     SONARQUBE_JDBC_URL=jdbc:postgresql://localhost/sonar
 
-RUN apt-get -q -y update \
-    && apt-get -q -y upgrade \
-    && apt-get -q -y install dnsutils mc net-tools sudo wget curl unzip vim postgresql \
-    # && echo "$SQ_USER ALL=NOPASSWD: ALL" >> /etc/sudoers \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get -q -y update && \
+    apt-get -q -y install dnsutils mc net-tools sudo wget curl unzip vim postgresql && \
+    # echo "$SQ_USER ALL=NOPASSWD: ALL" >> /etc/sudoers && \
+    rm -rf /var/lib/apt/lists/*
 
 # Postgresql database and SonarQube http ports
 EXPOSE 5432 9000
