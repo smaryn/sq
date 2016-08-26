@@ -1,10 +1,10 @@
 # LDAP configuration
 # General Configuration
 sonar.security.realm=LDAP
-# sonar.security.savePassword=false
+#sonar.security.savePassword=false
 sonar.security.savePassword=true
 ldap.url=ldap://ldap.intropro.com.ua:389
-# ldap.windows.auth=false
+#ldap.windows.auth=false
 
 # User Configuration
 ldap.user.baseDn=dc=intropro,dc=com,dc=ua
@@ -14,6 +14,8 @@ ldap.user.emailAttribute=mail
 
 # Group Configuration
 ldap.group.baseDn=dc=intropro,dc=com,dc=ua
-# ldap.group.request=(&(objectClass=posixGroup)(memberUid={uid}))
+#ldap.group.baseDn=cn=group_name,ou=groups,dc=intropro,dc=com,dc=ua
+ldap.group.baseDn=ou=groups,dc=intropro,dc=com,dc=ua
+#ldap.group.request=(&(objectClass=posixGroup)(memberUid={uid}))
 ldap.group.request=(&(objectClass=groupOfUniqueNames)(uniqueMember={dn}))
 ldap.group.idAttribute=cn
