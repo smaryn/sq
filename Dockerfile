@@ -1,9 +1,9 @@
 FROM java:8
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="3.5.1"
+LABEL version="5.6.4"
 
 ENV TERM=xterm \
-    SONARQUBE_VERSION=5.6 \
+    SONARQUBE_VERSION=5.6.4 \
     # Postgresql version
     PG_VERSION=9.4 \
     # Do not use SONARQUBE_HOME until it is created with
@@ -18,10 +18,10 @@ ENV TERM=xterm \
     SQ_URL=https://sonarsource.bintray.com/Distribution/sonarqube \
     SONARQUBE_JDBC_URL=jdbc:postgresql://localhost/sonar
 
-RUN apt-get -q -y update && \
-    apt-get -q -y install dnsutils mc net-tools sudo wget curl unzip vim postgresql && \
-    # echo "$SQ_USER ALL=NOPASSWD: ALL" >> /etc/sudoers && \
-    rm -rf /var/lib/apt/lists/*
+RUN apt-get -q -y update \
+    && apt-get -q -y install dnsutils sudo wget curl unzip vim postgresql \
+    # && echo "$SQ_USER ALL=NOPASSWD: ALL" >> /etc/sudoers \
+    && rm -rf /var/lib/apt/lists/*
 
 # Postgresql database and SonarQube http ports
 EXPOSE 5432 9000
@@ -76,9 +76,9 @@ RUN set -x \
     # && sed -i '/jdbc:postgresql/s/^#//g' $SONARQUBE_HOME/conf/sonar.properties \
 
     # LDAP settings should be applied after ldap plugin installation
-    && wget --tries=2 -q -c -P $SONARQUBE_HOME/extensions/plugins/ \
-    http://sonarsource.bintray.com/Distribution/sonar-ldap-plugin/sonar-ldap-plugin-2.0.jar \
-    && cat /tmp/sonar.ldap >> $SONARQUBE_HOME/conf/sonar.properties \
+    # && wget --tries=2 -q -c -P $SONARQUBE_HOME/extensions/plugins/ \
+    # http://sonarsource.bintray.com/Distribution/sonar-ldap-plugin/sonar-ldap-plugin-2.0.jar \
+    # && cat /tmp/sonar.ldap >> $SONARQUBE_HOME/conf/sonar.properties \
     && ln -s $SONARQUBE_HOME/bin/linux-x86-64/sonar.sh /usr/bin/sonar \
     && mv /tmp/sonar /etc/init.d/sonar \
     && chmod 755 /etc/init.d/sonar \
@@ -87,7 +87,7 @@ RUN set -x \
     # && /etc/init.d/postgresql stop
     && service postgresql stop
 
-# VOLUME ["$SONARQUBE_HOME/data", "$SONARQUBE_HOME/extensions"]
+VOLUME ["$SONARQUBE_HOME/data", "$SONARQUBE_HOME/extensions"]
 
 # ENTRYPOINT ["/bin/bash"]
 CMD service postgresql start && sleep 10 && service sonar start \
