@@ -2,8 +2,8 @@ FROM java:8
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
 LABEL version="5.6.5"
 
-ARG CXX_DIR=cxx-0.9.7-rc1 \
-    CXX_JAR=sonar-cxx-plugin-0.9.7-SNAPSHOT.jar
+ARG CXX_DIR=cxx-0.9.7-rc1
+ARG CXX_JAR=sonar-cxx-plugin-0.9.7-SNAPSHOT.jar
 
 ENV TERM=xterm \
     SONARQUBE_VERSION=5.6.5 \
