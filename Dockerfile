@@ -1,9 +1,12 @@
 FROM java:8
 MAINTAINER Sergii Marynenko <marynenko@gmail.com>
-LABEL version="5.6.4"
+LABEL version="5.6.5"
+
+ARG CXX_DIR=cxx-0.9.7-rc1 \
+    CXX_JAR=sonar-cxx-plugin-0.9.7-SNAPSHOT.jar
 
 ENV TERM=xterm \
-    SONARQUBE_VERSION=5.6.4 \
+    SONARQUBE_VERSION=5.6.5 \
     # Postgresql version
     PG_VERSION=9.4 \
     # Do not use SONARQUBE_HOME until it is created with
@@ -85,11 +88,15 @@ RUN set -x \
     && update-rc.d sonar defaults \
     # Stop Postgresql to awoid unexpected exit
     # && /etc/init.d/postgresql stop
-    && service postgresql stop
+    && service postgresql stop \
+    # Download c++ comunity plugin, versions defined in ARGs
+    && wget -c -O ${SONARQUBE_HOME}/extensions/plugins/${CXX_JAR} \
+    https://github.com/SonarOpenCommunity/sonar-cxx/releases/download/${CXX_DIR}/${CXX_JAR}
 
 VOLUME ["$SONARQUBE_HOME/data", "$SONARQUBE_HOME/extensions"]
 
 # ENTRYPOINT ["/bin/bash"]
 CMD service postgresql start && sleep 10 && service sonar start \
-    && tail -F /var/log/postgresql/postgresql-$PG_VERSION-main.log $SONARQUBE_HOME/logs/sonar.log
+    && tail -F $SONARQUBE_HOME/logs/sonar.log
+    # && tail -F /var/log/postgresql/postgresql-$PG_VERSION-main.log $SONARQUBE_HOME/logs/sonar.log
 # CMD service postgresql start && tail -F /var/log/postgresql/postgresql-$PG_VERSION-main.log
